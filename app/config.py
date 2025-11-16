@@ -144,9 +144,11 @@ class ProductionConfig(Config):
                 missing.append(var)
 
         if missing:
+            missing_vars = ", ".join(missing)
             raise ConfigurationError(
-                f"ProductionConfig missing required environment variables: {', '.join(missing)}. "
-                f"Please set these in your .env file or environment before deploying to production."
+                f"ProductionConfig missing required environment variables: "
+                f"{missing_vars}. Please set these in your .env file or "
+                f"environment before deploying to production."
             )
 
 

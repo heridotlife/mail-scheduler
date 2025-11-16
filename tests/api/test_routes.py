@@ -96,13 +96,13 @@ def test_save_emails_endpoint_error(mock_add_event, client):
         content_type="application/json",
     )
 
-    # Verify response
-    assert response.status_code == 400
+    # Verify response - unexpected exceptions return 500, not 400
+    assert response.status_code == 500
 
     # Parse JSON response
     data = json.loads(response.data)
 
     # Verify data
     assert "message" in data
-    assert "Error occurred" in data["message"]
+    assert "unexpected error" in data["message"].lower()
     assert "Test error" in data["message"]
