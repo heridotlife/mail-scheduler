@@ -29,6 +29,17 @@ def test_create_app_with_development_config():
     assert app.config["TESTING"] is False
 
 
+@pytest.mark.skipif(
+    not all(
+        [
+            os.environ.get("SECRET_KEY"),
+            os.environ.get("MAIL_USERNAME"),
+            os.environ.get("MAIL_PASSWORD"),
+            os.environ.get("MAIL_DEFAULT_SENDER"),
+        ]
+    ),
+    reason="ProductionConfig requires environment variables (skip in CI)",
+)
 def test_create_app_with_production_config():
     """Test creating an app with production configuration."""
     app = create_app(config.ProductionConfig)

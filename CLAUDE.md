@@ -277,7 +277,7 @@ flask rq info --interval 3
 ### Docker Development
 
 ```bash
-# Start all services
+# Start all services (local development with hot-reload)
 docker-compose up -d
 
 # Create database tables
@@ -290,6 +290,12 @@ docker-compose logs -f worker
 # Stop all services
 docker-compose down
 ```
+
+**Note**: Two Docker Compose configurations are available:
+- `docker-compose.yml` - Local development with volume mounts for hot-reload
+- `docker-compose.ci.yml` - CI/CD without volume mounts to avoid permission issues
+
+The CI configuration is used by GitHub Actions integration tests and bakes the application code into the Docker image during build.
 
 ### Testing
 
@@ -476,11 +482,26 @@ tests/
 
 GitHub Actions workflows in `.github/workflows/`:
 
-1. **pr-checks.yml**: Code quality, type checking, linting, tests (runs on PRs)
-2. **security-sast.yml**: Security scanning with Bandit, Safety, Semgrep, Pylint
-3. **ci.yml**: Integration testing with PostgreSQL/Redis containers
-4. **docs.yml**: Sphinx documentation generation
-5. **scheduled-tests.yml**: Weekly security audits
+1. **quality-checks.yml**: Comprehensive quality assurance pipeline (main CI/CD)
+   - Linting & Formatting (Black, isort, flake8)
+   - Type Checking (MyPy - advisory)
+   - Security Scanning (Bandit, Safety)
+   - Unit Tests (pytest with 40% coverage minimum)
+   - Integration Tests (Docker Compose with `docker-compose.ci.yml`)
+   - Quality Summary (aggregates all results, enforces critical checks)
+   - Runs on push to `main`/`develop` and all PRs
+
+2. **pr-checks.yml**: Additional PR validation
+   - Code quality, type checking, linting, tests
+   - Multi-Python version compatibility (3.9-3.12)
+
+3. **security-sast.yml**: Security scanning with Bandit, Safety, Semgrep, Pylint
+   - Weekly scheduled security audits
+   - PR comment summaries
+
+4. **ci.yml**: Integration testing with PostgreSQL/Redis containers
+
+5. **docs.yml**: Sphinx documentation generation
 
 Security reports stored as artifacts for 30 days with PR comment summaries.
 
@@ -507,6 +528,8 @@ Security reports stored as artifacts for 30 days with PR comment summaries.
 - **Service layer**: `app/services/` (base.py, event_service.py, recipient_service.py)
 - **Models**: `app/database/models.py`
 - **Environment config**: `.env` (never commit this file)
+- **Docker Compose (Local)**: `docker-compose.yml` (with volume mounts for development)
+- **Docker Compose (CI)**: `docker-compose.ci.yml` (without volume mounts for CI/CD)
 
 ## Database Migrations
 

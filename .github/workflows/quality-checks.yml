@@ -7,6 +7,10 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:  # Allow manual trigger
 
+# Set minimal permissions for all jobs (principle of least privilege)
+permissions:
+  contents: read
+
 jobs:
   lint-and-format:
     name: Linting & Formatting
@@ -59,6 +63,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install mypy types-redis types-python-dateutil
         pip install -r requirements.txt
+        pip install -e .
 
     - name: Type check with MyPy
       run: mypy app --ignore-missing-imports --no-strict-optional
@@ -82,6 +87,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install bandit[toml] safety
         pip install -r requirements.txt
+        pip install -e .
 
     - name: Security scan with Bandit
       run: |
@@ -122,6 +128,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest pytest-cov pytest-flask pytest-mock
         pip install -r requirements.txt
+        pip install -e .
 
     - name: Run unit tests with coverage
       run: |
@@ -167,6 +174,9 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Set up Docker Compose
+      uses: docker/setup-compose-action@v1
+
     - name: Create .env file
       run: |
         cat > .env << EOF
@@ -188,26 +198,26 @@ jobs:
 
     - name: Build and start services
       run: |
-        docker-compose up -d --build
+        docker compose -f docker-compose.ci.yml up -d --build
         sleep 30  # Wait for services to be ready
 
     - name: Check service health
       run: |
-        docker-compose ps
+        docker compose -f docker-compose.ci.yml ps
         curl -f http://localhost:8080/api/health || exit 1
 
     - name: Run integration tests
       run: |
-        docker-compose exec -T app python -m pytest tests/ -v --tb=short -m "integration or not unit" || true
+        docker compose -f docker-compose.ci.yml exec -T app python -m pytest tests/ -v --tb=short -m "integration or not unit" || true
       continue-on-error: true
 
     - name: Show service logs on failure
       if: failure()
-      run: docker-compose logs
+      run: docker compose -f docker-compose.ci.yml logs
 
     - name: Cleanup
       if: always()
-      run: docker-compose down -v
+      run: docker compose -f docker-compose.ci.yml down -v
 
   code-quality-summary:
     name: Quality Summary

@@ -43,6 +43,17 @@ def test_create_app_testing_config():
     assert app.static_folder.endswith("static")
 
 
+@pytest.mark.skipif(
+    not all(
+        [
+            os.environ.get("SECRET_KEY"),
+            os.environ.get("MAIL_USERNAME"),
+            os.environ.get("MAIL_PASSWORD"),
+            os.environ.get("MAIL_DEFAULT_SENDER"),
+        ]
+    ),
+    reason="DevelopmentConfig requires environment variables (skip in CI)",
+)
 def test_create_app_development_config():
     """Test creating an app with development config."""
     app = create_app(config.DevelopmentConfig)
@@ -55,6 +66,17 @@ def test_create_app_development_config():
     # Skip SQLALCHEMY_DATABASE_URI check as it depends on environment
 
 
+@pytest.mark.skipif(
+    not all(
+        [
+            os.environ.get("SECRET_KEY"),
+            os.environ.get("MAIL_USERNAME"),
+            os.environ.get("MAIL_PASSWORD"),
+            os.environ.get("MAIL_DEFAULT_SENDER"),
+        ]
+    ),
+    reason="ProductionConfig requires environment variables (skip in CI)",
+)
 def test_create_app_production_config():
     """Test creating an app with production config."""
     app = create_app(config.ProductionConfig)

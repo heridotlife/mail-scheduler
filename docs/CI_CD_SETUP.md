@@ -152,10 +152,13 @@ The CI/CD pipeline runs automatically on:
 - **Status**: Required to pass (with 40% coverage minimum)
 
 #### 5. Integration Tests
-- Builds Docker Compose stack
-- Runs integration tests
+- Builds Docker Compose stack using `docker-compose.ci.yml`
+- Runs integration tests in containerized environment
 - Tests API health endpoints
+- Verifies service startup and connectivity
 - **Status**: Advisory (may fail if infrastructure issues)
+
+**Note**: Integration tests use a separate `docker-compose.ci.yml` file (instead of `docker-compose.yml`) to avoid permission issues in CI. This CI-specific configuration excludes volume mounts since the application code is baked into the Docker image during build.
 
 #### 6. Quality Summary
 - Aggregates results from all jobs
@@ -175,6 +178,31 @@ The CI/CD pipeline runs automatically on:
 - `pyproject.toml` - Black, isort, MyPy, pytest, coverage config
 - `.github/workflows/quality-checks.yml` - GitHub Actions workflow
 - `scripts/quality-check.sh` - Local check runner script
+- `docker-compose.yml` - Local development Docker configuration (with volume mounts)
+- `docker-compose.ci.yml` - CI/CD Docker configuration (without volume mounts)
+
+### Docker Compose Configuration
+
+The project uses two Docker Compose configurations:
+
+**`docker-compose.yml` (Local Development)**
+- Includes volume mounts for hot-reload during development
+- Mounts local code directory into containers: `volumes: - .:/var/www/mail-scheduler`
+- Allows real-time code changes without rebuilding containers
+- Used for local development with `docker-compose up -d`
+
+**`docker-compose.ci.yml` (CI/CD)**
+- Excludes volume mounts to avoid permission conflicts in CI environments
+- Application code is baked into the Docker image during build
+- Prevents permission errors when non-root user creates directories
+- Used by GitHub Actions integration tests: `docker compose -f docker-compose.ci.yml up -d`
+
+**Why Two Files?**
+In CI environments, volume mounts can cause permission issues because:
+1. The GitHub Actions runner mounts its working directory
+2. The mounted directory may have different ownership/permissions
+3. The non-root user (`appuser`) in containers cannot create required directories
+4. By baking code into the image (no volume mounts), we avoid these permission conflicts
 
 ## Quality Standards
 

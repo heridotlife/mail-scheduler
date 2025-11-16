@@ -22,7 +22,17 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 ### CI/CD Workflows
 
-- **Pull Request Checks** (`pr-checks.yml`): Comprehensive validation for PRs
+- **Code Quality & Testing** (`quality-checks.yml`): Comprehensive quality assurance pipeline
+  - **Linting & Formatting**: Black, isort, flake8 validation
+  - **Type Checking**: MyPy static type analysis (advisory)
+  - **Security Scanning**: Bandit and Safety checks with artifact reports
+  - **Unit Tests**: Full test suite with coverage reporting (40% minimum)
+  - **Integration Tests**: Docker Compose stack testing with health checks
+  - **Quality Summary**: Aggregates all results and enforces critical checks
+  - Runs on push to `main`/`develop` and all pull requests
+  - Manual trigger available via workflow_dispatch
+
+- **Pull Request Checks** (`pr-checks.yml`): Additional PR validation
   - Code quality: Black, isort, flake8, mypy
   - Testing: Full test suite with coverage
   - Compatibility: Multi-Python version testing (3.9-3.12)
@@ -136,6 +146,12 @@ Create the database tables:
 ```bash
 docker-compose exec app flask create_db
 ```
+
+**Note**: The project includes two Docker Compose configurations:
+- `docker-compose.yml` - For local development with volume mounts (hot-reload)
+- `docker-compose.ci.yml` - For CI/CD environments without volume mounts (used by GitHub Actions)
+
+The CI configuration avoids permission issues in automated environments by baking the application code into the Docker image during build, rather than mounting it as a volume.
 
 ## Documentation
 
