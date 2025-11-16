@@ -37,6 +37,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy project files
 COPY --chown=appuser:appuser . .
 
+# Create instance directory for Flask with proper permissions
+RUN mkdir -p $APP_HOME/instance && chown -R appuser:appuser $APP_HOME/instance
+
 # Set permissions
 RUN chmod +x $APP_HOME/docker-entrypoint.sh
 
