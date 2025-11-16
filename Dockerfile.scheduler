@@ -32,18 +32,19 @@ RUN python -m venv $VIRTUAL_ENV
 # Install dependencies
 COPY --chown=appuser:appuser requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    # Fix RQ Scheduler compatibility issues
-    pip install --no-cache-dir rq-scheduler==0.9.0
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY --chown=appuser:appuser . .
 
-# Set permissions for entrypoint scripts
-RUN chmod +x $APP_HOME/docker-entrypoint.sh $APP_HOME/scheduler-entrypoint.sh
+# Set permissions
+RUN chmod +x $APP_HOME/docker-entrypoint.sh
 
 # Switch to non-root user
 USER appuser
 
-# Set the entrypoint to our custom scheduler script
-ENTRYPOINT ["./scheduler-entrypoint.sh"]
+# Entrypoint
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
+# Default command - run RQ scheduler
+CMD ["rqscheduler", "--host", "redis", "--port", "6379"]

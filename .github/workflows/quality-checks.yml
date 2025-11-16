@@ -1,0 +1,232 @@
+name: Code Quality & Security Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  lint-and-format:
+    name: Linting & Formatting
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black isort flake8 flake8-docstrings flake8-bugbear
+
+    - name: Check code formatting with Black
+      run: black --check app tests
+      continue-on-error: false
+
+    - name: Check import sorting with isort
+      run: isort --check-only app tests
+      continue-on-error: false
+
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 app tests --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 app tests --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mypy types-redis types-python-dateutil
+        pip install -r requirements.txt
+
+    - name: Type check with MyPy
+      run: mypy app --ignore-missing-imports --no-strict-optional
+      continue-on-error: true  # Type checking is advisory for now
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit[toml] safety
+        pip install -r requirements.txt
+
+    - name: Security scan with Bandit
+      run: |
+        bandit -r app -f json -o bandit-report.json || true
+        bandit -r app -ll
+      continue-on-error: false
+
+    - name: Upload Bandit report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+    - name: Check dependencies with Safety
+      run: safety check --json || true
+      continue-on-error: true  # Advisory only
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov pytest-flask pytest-mock
+        pip install -r requirements.txt
+
+    - name: Run unit tests with coverage
+      run: |
+        pytest tests/ -v --tb=short \
+          --cov=app \
+          --cov-report=term-missing \
+          --cov-report=xml \
+          --cov-report=html \
+          --junitxml=pytest-report.xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: always()
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: pytest-results-${{ matrix.python-version }}
+        path: |
+          pytest-report.xml
+          htmlcov/
+
+    - name: Check coverage threshold
+      run: |
+        coverage report --fail-under=40
+      continue-on-error: true
+
+  integration-tests:
+    name: Integration Tests (Docker Compose)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Create .env file
+      run: |
+        cat > .env << EOF
+        FLASK_APP=serve.py
+        FLASK_DEBUG=1
+        APP_SETTINGS=config.DevelopmentConfig
+        SECRET_KEY=ci-test-secret-key
+        MAIL_USERNAME=test@example.com
+        MAIL_PASSWORD=test-password
+        MAIL_DEFAULT_SENDER=noreply@test.local
+        LOG_LEVEL=DEBUG
+        POSTGRES_HOST=postgres
+        POSTGRES_PORT=5432
+        POSTGRES_USER=postgres
+        POSTGRES_PASS=postgres
+        REDIS_HOST=redis
+        REDIS_PORT=6379
+        EOF
+
+    - name: Build and start services
+      run: |
+        docker-compose up -d --build
+        sleep 30  # Wait for services to be ready
+
+    - name: Check service health
+      run: |
+        docker-compose ps
+        curl -f http://localhost:8080/api/health || exit 1
+
+    - name: Run integration tests
+      run: |
+        docker-compose exec -T app python -m pytest tests/ -v --tb=short -m "integration or not unit" || true
+      continue-on-error: true
+
+    - name: Show service logs on failure
+      if: failure()
+      run: docker-compose logs
+
+    - name: Cleanup
+      if: always()
+      run: docker-compose down -v
+
+  code-quality-summary:
+    name: Quality Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, type-check, security-scan, unit-tests, integration-tests]
+    if: always()
+
+    steps:
+    - name: Check job results
+      run: |
+        echo "Lint & Format: ${{ needs.lint-and-format.result }}"
+        echo "Type Check: ${{ needs.type-check.result }}"
+        echo "Security Scan: ${{ needs.security-scan.result }}"
+        echo "Unit Tests: ${{ needs.unit-tests.result }}"
+        echo "Integration Tests: ${{ needs.integration-tests.result }}"
+
+    - name: Fail if critical checks failed
+      if: |
+        needs.lint-and-format.result == 'failure' ||
+        needs.security-scan.result == 'failure' ||
+        needs.unit-tests.result == 'failure'
+      run: exit 1

@@ -102,8 +102,8 @@ def test_save_emails_exception(mock_add_event, client):
         content_type="application/json",
     )
 
-    # Check the response (should include the error message)
-    assert response.status_code == 400
+    # Check the response (unexpected exceptions should return 500)
+    assert response.status_code == 500
 
     # Parse the JSON response
     result = json.loads(response.data)

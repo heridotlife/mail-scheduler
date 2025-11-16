@@ -109,7 +109,13 @@ def dt_utc(dt: Union[str, datetime]) -> datetime:
         if "not a valid timestamp" in str(dt) or "unknown" in str(e).lower():
             raise Exception(f"Invalid datetime format: {dt}")
         # If parsing fails, return the current time as a fallback
-        print(f"Error parsing datetime: {e}")
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            f"Failed to parse datetime '{dt}': {e}. Using current time as fallback.",
+            exc_info=True,
+        )
         utc_now = datetime.now(UTC)
         return utc_now.replace(tzinfo=None)
 

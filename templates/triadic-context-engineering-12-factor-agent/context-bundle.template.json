@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "bundle_id": "<unique-id>",
+    "created_at": "<ISO8601 timestamp>",
+    "schema": "schemas/context-contract.json",
+    "mission": {
+      "objective": "<brief objective>",
+      "stage": "<plan|execute|review>",
+      "success_metrics": ["<metric>"]
+    }
+  },
+  "participants": {
+    "user": {
+      "name": "<name>",
+      "role": "<role>",
+      "contact": "<preferred channel>"
+    },
+    "agentic_a": {
+      "model": "<model id>",
+      "persona": "<link to persona file>",
+      "strengths": ["<strength>"]
+    },
+    "agentic_b": {
+      "model": "<model id>",
+      "persona": "<link to persona file>",
+      "strengths": ["<strength>"]
+    }
+  },
+  "context_inputs": {
+    "source_documents": [
+      {
+        "id": "<doc id>",
+        "path": "<relative path>",
+        "purpose": "<why the triad needs this>"
+      }
+    ],
+    "state_snapshots": [
+      {
+        "timestamp": "<ISO8601>",
+        "owner": "<user|agentic_a|agentic_b>",
+        "summary": "<compact state description>"
+      }
+    ]
+  },
+  "operational_contract": {
+    "turn_cadence": "<description>",
+    "tooling": ["<tool or API>"]
+  },
+  "compliance": {
+    "policy_refs": ["<doc or url>"],
+    "data_classification": "<classification level>",
+    "retention": "<retention policy>"
+  }
+}

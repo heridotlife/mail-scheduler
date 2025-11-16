@@ -35,11 +35,14 @@ def patch_rq_scheduler():
         if not hasattr(rq.utils, "ColorizingStreamHandler"):
             # Add the class to the module
             rq.utils.ColorizingStreamHandler = ColorizingStreamHandler  # type: ignore[attr-defined]  # noqa: E501
-            print("Successfully patched RQ Scheduler compatibility.")
+            logger = logging.getLogger(__name__)
+            logger.info("Successfully patched RQ Scheduler compatibility.")
         else:
-            print("RQ already has ColorizingStreamHandler, no patch needed.")
+            logger = logging.getLogger(__name__)
+            logger.debug("RQ already has ColorizingStreamHandler, no patch needed.")
     except ImportError as e:
-        print(f"Could not patch RQ Scheduler: {str(e)}")
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Could not patch RQ Scheduler: {str(e)}")
 
 
 # Apply the patch automatically when this module is imported

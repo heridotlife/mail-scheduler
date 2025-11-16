@@ -2,7 +2,7 @@ alembic==1.13.1
 aniso8601==9.0.1
 beautifulsoup4==4.12.3
 blinker==1.7.0
-bs4==0.0.2
+# bs4==0.0.2  # REMOVED: Redundant metapackage - beautifulsoup4 is the actual package
 click==8.1.7
 croniter==2.0.2
 Flask==2.3.2
@@ -12,7 +12,7 @@ Flask-Mail==0.9.1
 Flask-Migrate==4.0.5
 flask-restx==1.3.0
 Flask-RQ2==18.3
-Flask-Script==2.0.6
+# Flask-Script==2.0.6  # REMOVED: Deprecated - use Flask CLI instead
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
 isodate==0.6.1
@@ -27,9 +27,9 @@ python-dateutil==2.8.2
 python-editor==1.0.4
 pytz==2024.1
 redis==5.0.1
-rq==1.15.1
-rq-scheduler==0.10.0
-six==1.16.0
+rq==1.16.2
+rq-scheduler==0.13.1
+#six==  # REMOVED: Python 2/3 compatibility - not needed for Python 3.11+1.16.0
 # Update SQLAlchemy for Python 3.13 compatibility
 SQLAlchemy==2.0.30
 tzlocal==5.2
