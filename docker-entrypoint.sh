@@ -21,6 +21,12 @@ wait_for_postgres() {
   echo "PostgreSQL is up - continuing"
 }
 
+# Create instance directory if it doesn't exist (needed when using volume mounts)
+if [ ! -d "$APP_HOME/instance" ]; then
+  echo "Creating instance directory..."
+  mkdir -p "$APP_HOME/instance"
+fi
+
 # Wait for Redis and Postgres to be ready
 if [ "$1" = "python" ]; then
   wait_for_redis
