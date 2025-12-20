@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mail-scheduler"
-version = "0.1.0"
+version = "0.2.0"
 description = "Flask-based mail scheduler application"
 authors = [
     { name = "Mail Scheduler Team" }
@@ -12,54 +12,57 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Framework :: Flask",
 ]
 dependencies = [
-    "alembic==1.13.1",
-    "aniso8601==9.0.1",
-    "beautifulsoup4==4.12.3",
-    "blinker==1.7.0",
-    "bs4==0.0.2",
-    "click==8.1.7",
-    "croniter==2.0.2",
-    "Flask==2.3.2",
-    "Flask-Admin==1.6.1",
-    "Flask-Login==0.6.3",
-    "Flask-Mail==0.9.1",
-    "Flask-Migrate==4.0.5",
-    "flask-restx==1.3.0",
-    "Flask-RQ2==18.3",
-    "Flask-Script==2.0.6",
-    "Flask-SQLAlchemy==3.1.1",
-    "Flask-WTF==1.2.1",
-    "isodate==0.6.1",
-    "itsdangerous==2.1.2",
-    "Jinja2==3.1.6",
-    "jsonschema==4.17.3",
-    "Mako==1.3.0",
-    "MarkupSafe==2.1.5",
-    "psycopg2-binary==2.9.9",
-    "python-dateutil==2.8.2",
-    "python-editor==1.0.4",
-    "pytz==2024.1",
-    "redis==5.0.1",
-    "rq==1.15.1",
-    "rq-scheduler==0.10.0",
-    "six==1.16.0",
-    "SQLAlchemy==2.0.30",
-    "tzlocal==5.2",
-    "Werkzeug==3.0.6",
-    "WTForms==3.1.1",
-    "email-validator==2.1.0.post1",
-    "bcrypt==4.0.1",
-    "Sphinx==7.2.6",
-    "sphinx-rtd-theme==2.0.0",
-    "sphinxcontrib-httpdomain==1.8.1",
+    "setuptools>=65.0.0",
+    "alembic>=1.13.1",
+    "aniso8601>=9.0.1",
+    "beautifulsoup4>=4.12.3",
+    "blinker>=1.7.0",
+    "bs4>=0.0.2",
+    "click>=8.1.7",
+    "croniter>=2.0.2",
+    "Flask>=2.3.2",
+    "Flask-Admin>=1.6.1",
+    "Flask-Login>=0.6.3",
+    "Flask-Mail>=0.9.1",
+    "Flask-Migrate>=4.0.5",
+    "flask-restx>=1.3.0",
+    "Flask-RQ2>=18.3",
+    "Flask-Script>=2.0.6",
+    "Flask-SQLAlchemy>=3.1.1",
+    "Flask-WTF>=1.2.1",
+    "isodate>=0.6.1",
+    "itsdangerous>=2.1.2",
+    "Jinja2>=3.1.6",
+    "jsonschema>=4.17.3",
+    "Mako>=1.3.0",
+    "MarkupSafe>=2.1.5",
+    "psycopg2-binary>=2.9.9",
+    "python-dateutil>=2.8.2",
+    "python-editor>=1.0.4",
+    "pytz>=2024.1",
+    "redis>=5.0.1",
+    "rq>=1.15.1",
+    "rq-scheduler>=0.10.0",
+    "six>=1.16.0",
+    "SQLAlchemy>=2.0.30",
+    "tzlocal>=5.2",
+    "Werkzeug>=3.0.6",
+    "WTForms>=3.1.1",
+    "email-validator>=2.1.0.post1",
+    "bcrypt>=4.0.1",
+    "Sphinx>=7.2.6",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinxcontrib-httpdomain>=1.8.1",
 ]
 
 [project.optional-dependencies]
@@ -200,7 +203,7 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
     "if 0:",
-    "if __name__ == .__main__.:"
+    "if __name__ >= .__main__.:"
 ]
 
 [dependency-groups]

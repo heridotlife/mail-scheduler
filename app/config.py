@@ -45,7 +45,7 @@ class Config(object):
     if not _secret_key:
         # Allow insecure default only in development/testing
         # Production will override and validate
-        SECRET_KEY = "INSECURE-DEV-KEY-CHANGE-THIS"
+        SECRET_KEY = "INSECURE-DEV-KEY-CHANGE-THIS"  # nosec
         print(
             "WARNING: Using insecure default SECRET_KEY. "
             "Set SECRET_KEY environment variable for production!",
@@ -116,6 +116,7 @@ class ProductionConfig(Config):
         super().__init__()
 
         # Validate critical secrets
+        # pylint: disable=invalid-name
         self.SECRET_KEY = get_required_env("SECRET_KEY", "ProductionConfig")
         self.MAIL_USERNAME = get_required_env("MAIL_USERNAME", "ProductionConfig")
         self.MAIL_PASSWORD = get_required_env("MAIL_PASSWORD", "ProductionConfig")
@@ -215,9 +216,9 @@ class TestingConfig(Config):
     RQ_ASYNC = False
 
     # Override with test-specific values
-    SECRET_KEY = "test-secret-key-for-testing-only"
+    SECRET_KEY = "test-secret-key-for-testing-only"  # nosec
     MAIL_USERNAME = "test@example.com"
-    MAIL_PASSWORD = "test-password"
+    MAIL_PASSWORD = "test-password"  # nosec
     MAIL_DEFAULT_SENDER = "test@example.com"
 
     @classmethod
