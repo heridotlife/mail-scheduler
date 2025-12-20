@@ -66,11 +66,11 @@ if command -v uv > /dev/null 2>&1; then
 
     # Create new virtual environment and sync dependencies with uv
     if uv sync --extra dev > /dev/null 2>&1; then
-        echo -e "${GREEN}✅ Virtual environment created and dependencies synced (Python 3.11)${NC}"
+        echo -e "${GREEN}✅ Virtual environment created and dependencies synced (Python 3.13)${NC}"
     else
-        echo -e "${RED}❌ Virtual environment creation and sync failed (Python 3.11)${NC}"
+        echo -e "${RED}❌ Virtual environment creation and sync failed (Python 3.13)${NC}"
         echo -e "${YELLOW}⚠️ Falling back to basic uv venv...${NC}"
-        if uv venv --python 3.11 > /dev/null 2>&1; then
+        if uv venv --python 3.13 > /dev/null 2>&1; then
             echo -e "${GREEN}✅ Virtual environment created (system Python)${NC}"
             # Activate and install manually as fallback
             source .venv/bin/activate
