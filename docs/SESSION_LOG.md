@@ -336,3 +336,92 @@ All checks passing on PR #28:
 - All quality checks passing in automated pipeline
 - PR #28 merged successfully
 
+
+---
+
+## Session 2026-08-22 - Dependency Update (14-day stability window)
+
+### Persona Selected
+- Primary: **Developer Agent** (dependency maintenance, per PR #27/#28/#30 pattern)
+
+### Context Loaded
+- Files read: pyproject.toml, uv.lock, requirements*.txt, .github/workflows/*, app/extensions.py, app/event/jobs.py
+- Constraints: 14-day stability window (versions published <= 2026-08-08); Flask-RQ2 18.3 compat; pyproject is source of truth; requirements*.txt mirrors
+
+### Decisions Made
+1. Pin 18 packages whose latest release was published after 2026-08-08 to the newest qualifying version via `[tool.uv] constraint-dependencies` (incl. rq 2.11.0 -> 2.10.0; 2.11 also pulls beta opentelemetry-instrumentation-threading 0.58b0).
+2. Cap setuptools `>=81.0.0,<82`: Flask-RQ2 18.3 imports pkg_resources at runtime, removed in setuptools 82.0.0; 81.0.0 (2026-02-06) is the last release shipping it.
+3. Sphinx floor set to 9.0.4 (not 9.1.0): sphinx 9.1.0 requires Python >=3.12; uv.lock pins 9.0.4 on <3.12 and 9.1.0 on >=3.12 via markers.
+4. redis 7->8 + rq 2.6->2.10 adopted: Flask-RQ2 declares no caps (rq>=0.13, redis>=3.0); rq 2.9.1+ officially supports redis-py 8; app only uses @rq.job + get_scheduler().
+5. requirements-loose.txt untouched (deliberately permissive floors, no contradictions).
+6. mcp==1.23.3 vulnerability chain kept: hard-pinned by semgrep 1.172.0 upstream; fixed pairing (semgrep 1.174.0 + mcp 1.29.0) published 2026-08-20, outside window. Pre-existing on main; dev-only.
+
+### Constraints Applied
+- All locked versions verified published <= 2026-08-08 and not yanked (103 changed packages checked against PyPI)
+- pyproject floors raised to exactly match locked versions; mirrors updated to same floors
+
+### Risks Identified
+- setuptools CVE-2026-59890 (<83): fix removes pkg_resources (Flask-RQ2 blocker) - accepted; pre-existing on main (80.9)
+- 3 mcp advisories via semgrep pin: dev-only, pre-existing on main, revisit after 2026-09-03
+
+### Outcomes Achieved
+- 103 packages updated; gates: uv sync --locked PASS, pytest 112 passed/3 skipped, flake8/black/isort PASS, mypy clean (2.3.0, overrides completed), bandit -ll PASS, safety 0 new advisories
+
+### Next Actions
+- Re-evaluate window pins after 2026-09-03 (rq 2.11, setuptools >=83 requires Flask-RQ2 replacement/patch, semgrep 1.174 + mcp 1.29)
+
+---
+
+## Session 2026-08-22 (b) - Python Runtime Bump to 3.14
+
+### Persona Selected
+- Primary: **Developer Agent** (CI/runtime maintenance, appended to PR #31 branch)
+
+### Context Loaded
+- Files read: .github/workflows/* (6 files), Dockerfile, Dockerfile.scheduler, pyproject.toml, setup.py, tests/conftest.py, docs/Makefile
+- Constraints: additive commit to chore/update-dependencies-2026-08-22; PR #31 commits untouched; requires-python floor stays >=3.11
+
+### Decisions Made
+1. Target 3.14.6 (latest stable; 3.15 is beta, 3.16 does not exist).
+2. quality-checks.yml: all python refs 3.13 -> 3.14 (primary CI pipeline).
+3. ci.yml + pr-checks.yml compatibility matrices -> ['3.13', '3.14']; floor legs kept (ci.yml '3.11' pip leg; pr-checks docs leg '3.13').
+4. scheduled-tests.yml matrix [3.9, 3.11] -> [3.11, 3.14]: 3.9 leg was already broken on main (requires-python >=3.11); keeps 3.11 floor leg, adds 3.14.
+5. security-sast.yml + scheduled-tests.yml uv pin 0.8.3 -> 0.9.18: uv 0.8.3 predates Python 3.14.0 final and cannot install it; 0.9.18 is the pin already proven green on PR #31.
+6. docs.yml 3.11 -> 3.14 (sphinx 9.1.0 selected on py>=3.12; local sphinx-build verified).
+7. Dockerfile python:3.13-slim -> python:3.14-slim; Dockerfile.scheduler python:3.11-slim -> python:3.14-slim (tags verified on Docker Hub).
+8. Added Python 3.14 classifier to pyproject.toml + setup.py.
+
+### Constraints Applied
+- All locked versions verified to ship cp314 linux wheels (psycopg2-binary 2.9.12, greenlet 3.5.4, rpds-py, cryptography 50, pydantic-core, mypy 2.3.0, semgrep 1.172.0, cffi, bcrypt, librt, wrapt, MarkupSafe)
+
+### Risks Identified
+- Flask-RQ2 pkg_resources DeprecationWarnings on 3.14: benign, imports/tests clean - future setuptools>=82 remains the real blocker (see previous session)
+
+### Outcomes Achieved
+- Gates under Python 3.14.6: uv sync --locked (all wheels, no source builds) PASS; pytest 112 passed/3 skipped; flake8/black/isort PASS; mypy clean; bandit -ll exit 0; sphinx 9.1.0 docs build succeeds (12 warnings, CI has no -W)
+
+### Next Actions
+- Monitor CI matrix legs (3.14) on PR #31; drop 3.13 from matrices when 3.15 ships if desired
+
+---
+
+## Session 2026-08-22 (c) - uv audit Remediation
+
+### Persona Selected
+- Primary: **Developer Agent** (security hygiene, appended to PR #31 branch)
+
+### Context Loaded
+- uv audit baseline: 8 findings = 6x mcp 1.23.3 (GHSA/PYSEC, fixed 1.27.2/1.28.1) + 2x setuptools 81.0.0 (fixed 83.0.0)
+- semgrep release/mcp-pin map from PyPI; Flask-RQ2 master source from GitHub; lock dependency graph
+
+### Decisions Made
+1. mcp: newest window-qualified semgrep (1.172.0, 2026-07-28) hard-pins mcp==1.23.3; unblocking semgrep 1.173.0 (mcp==1.29.0) is dated 2026-08-13 - outside window. Adopted [tool.uv] override-dependencies = ["mcp==1.28.1"] (newest window-qualified fixed release, 2026-06-26). Verified semgrep imports mcp ONLY in its optional MCP-server subcommand (semgrep/mcp/*, commands/mcp.py) - scan engine untouched. Empirically: semgrep --version OK; full CI-style --config=auto scan of app/ exits 0 (12 Jinja template PartialParsing errors are pre-existing template-parse noise, findings=5 legit audits).
+2. setuptools: premise VERIFIED empirically in throwaway venvs - under setuptools 83.0.0 pkg_resources is absent and flask_rq2 import raises ModuleNotFoundError; Flask-RQ2 master (file untouched since 2018) still imports pkg_resources top-level, no fixed release exists; nothing else in the lock requires setuptools, so dropping it from [project.dependencies] would strip pkg_resources from uv-synced envs and crash the app at import. DECISION: keep >=81,<82 cap; accept 2 advisories as documented risk (both are sdist/packaging attack surface - MANIFEST.in NFC/NFD bypass and package_index - never exercised by this app; setuptools serves only as pkg_resources provider + build backend).
+3. Result: uv audit 8 -> 2 findings (setuptools only, accepted-risk).
+
+### Outcomes Achieved
+- Gates under Python 3.14.6: uv sync --locked PASS; pytest 112 passed/3 skipped; flake8/black/isort PASS; mypy clean; bandit -ll exit 0; semgrep CI-config scan PASS
+
+### Next Actions
+- Drop the mcp override once semgrep >=1.173.0 enters the 14-day window (>= 2026-08-27)
+- Revisit setuptools cap only if Flask-RQ2 ever ships a pkg_resources-free release or the app migrates off Flask-RQ2

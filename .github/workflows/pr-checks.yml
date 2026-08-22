@@ -79,7 +79,7 @@ jobs:
     needs: code-quality
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.13', '3.14']
 
     services:
       postgres:
