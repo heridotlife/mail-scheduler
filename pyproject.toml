@@ -113,6 +113,15 @@ constraint-dependencies = [
     "types-webencodings==0.5.0.20260408",  # 0.6.0.20260822 (2026-08-22) too new
 ]
 
+# mcp is hard-pinned to ==1.23.3 (6 open advisories, fixed in 1.27.2/1.28.1) by
+# semgrep 1.172.0 — the newest semgrep published within the 14-day window
+# (1.173.0, which moved to mcp==1.29.0, is dated 2026-08-13, outside it).
+# semgrep imports mcp only inside its optional `semgrep mcp` server subcommand
+# (semgrep/mcp/*, commands/mcp.py); the scan engine never touches it, so we
+# force the fixed, window-qualified mcp 1.28.1 (2026-06-26) instead.
+# Drop this override once semgrep >=1.173.0 qualifies for the window.
+override-dependencies = ["mcp==1.28.1"]
+
 [tool.bandit]
 # Bandit security linter configuration
 exclude_dirs = [

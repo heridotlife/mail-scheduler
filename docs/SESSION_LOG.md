@@ -402,3 +402,26 @@ All checks passing on PR #28:
 
 ### Next Actions
 - Monitor CI matrix legs (3.14) on PR #31; drop 3.13 from matrices when 3.15 ships if desired
+
+---
+
+## Session 2026-08-22 (c) - uv audit Remediation
+
+### Persona Selected
+- Primary: **Developer Agent** (security hygiene, appended to PR #31 branch)
+
+### Context Loaded
+- uv audit baseline: 8 findings = 6x mcp 1.23.3 (GHSA/PYSEC, fixed 1.27.2/1.28.1) + 2x setuptools 81.0.0 (fixed 83.0.0)
+- semgrep release/mcp-pin map from PyPI; Flask-RQ2 master source from GitHub; lock dependency graph
+
+### Decisions Made
+1. mcp: newest window-qualified semgrep (1.172.0, 2026-07-28) hard-pins mcp==1.23.3; unblocking semgrep 1.173.0 (mcp==1.29.0) is dated 2026-08-13 - outside window. Adopted [tool.uv] override-dependencies = ["mcp==1.28.1"] (newest window-qualified fixed release, 2026-06-26). Verified semgrep imports mcp ONLY in its optional MCP-server subcommand (semgrep/mcp/*, commands/mcp.py) - scan engine untouched. Empirically: semgrep --version OK; full CI-style --config=auto scan of app/ exits 0 (12 Jinja template PartialParsing errors are pre-existing template-parse noise, findings=5 legit audits).
+2. setuptools: premise VERIFIED empirically in throwaway venvs - under setuptools 83.0.0 pkg_resources is absent and flask_rq2 import raises ModuleNotFoundError; Flask-RQ2 master (file untouched since 2018) still imports pkg_resources top-level, no fixed release exists; nothing else in the lock requires setuptools, so dropping it from [project.dependencies] would strip pkg_resources from uv-synced envs and crash the app at import. DECISION: keep >=81,<82 cap; accept 2 advisories as documented risk (both are sdist/packaging attack surface - MANIFEST.in NFC/NFD bypass and package_index - never exercised by this app; setuptools serves only as pkg_resources provider + build backend).
+3. Result: uv audit 8 -> 2 findings (setuptools only, accepted-risk).
+
+### Outcomes Achieved
+- Gates under Python 3.14.6: uv sync --locked PASS; pytest 112 passed/3 skipped; flake8/black/isort PASS; mypy clean; bandit -ll exit 0; semgrep CI-config scan PASS
+
+### Next Actions
+- Drop the mcp override once semgrep >=1.173.0 enters the 14-day window (>= 2026-08-27)
+- Revisit setuptools cap only if Flask-RQ2 ever ships a pkg_resources-free release or the app migrates off Flask-RQ2
