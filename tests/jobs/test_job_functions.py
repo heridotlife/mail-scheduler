@@ -88,7 +88,7 @@ def test_add_event(mock_schedule, db, session):
     assert mock_schedule.called
 
 
-@patch("app.event.jobs.rq.get_scheduler")
+@patch("app.event.jobs.get_scheduler")
 def test_schedule_mail(mock_get_scheduler, db):
     """Test scheduling a mail job."""
     # Mock the scheduler

@@ -27,7 +27,7 @@ services:
 
   worker:
     build: .
-    command: python -m flask rq worker
+    command: python -m app.worker
     environment:
       - FLASK_APP=serve.py
       - FLASK_DEBUG=${FLASK_DEBUG:-1}

@@ -24,7 +24,6 @@ constraints = [
     { name = "python-dotenv", specifier = "==1.2.2" },
     { name = "rq", specifier = "==2.10.0" },
     { name = "semgrep", specifier = "==1.172.0" },
-    { name = "setuptools", specifier = "==81.0.0" },
     { name = "sqlalchemy", specifier = "==2.0.51" },
     { name = "stevedore", specifier = "==5.9.0" },
     { name = "types-webencodings", specifier = "==0.5.0.20260408" },
@@ -986,21 +985,6 @@ wheels = [
 ]
 
 [[package]]
-name = "flask-rq2"
-version = "18.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "flask" },
-    { name = "redis" },
-    { name = "rq" },
-    { name = "rq-scheduler" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/73/edea2742650daa2b1589e8cb592abe7da5d8ce530642e62f047b205580b7/Flask-RQ2-18.3.tar.gz", hash = "sha256:3ef6395065255447f8e1516ccca24858ba87da1d71a6975e0e3b55256bf04967", size = 29105, upload-time = "2018-12-20T10:53:32.738Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/61/47/341667d55567995f6a54096e4156edaaad645dd7c90133e646ed9ba56968/Flask_RQ2-18.3-py2.py3-none-any.whl", hash = "sha256:abe1e52d3b98abe37e85830a614ba6af864516f1b6cf2229f352f8500eafc5fd", size = 12999, upload-time = "2018-12-20T10:53:31.409Z" },
-]
-
-[[package]]
 name = "flask-script"
 version = "2.0.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1454,7 +1438,6 @@ dependencies = [
     { name = "flask-mail" },
     { name = "flask-migrate" },
     { name = "flask-restx" },
-    { name = "flask-rq2" },
     { name = "flask-script" },
     { name = "flask-sqlalchemy" },
     { name = "flask-wtf" },
@@ -1525,7 +1508,6 @@ requires-dist = [
     { name = "flask-mail", specifier = ">=0.10.0" },
     { name = "flask-migrate", specifier = ">=4.1.0" },
     { name = "flask-restx", specifier = ">=1.3.2" },
-    { name = "flask-rq2", specifier = ">=18.3" },
     { name = "flask-script", specifier = ">=2.0.6" },
     { name = "flask-sqlalchemy", specifier = ">=3.1.1" },
     { name = "flask-wtf", specifier = ">=1.3.0" },
@@ -1549,7 +1531,7 @@ requires-dist = [
     { name = "rq-scheduler", specifier = ">=0.14.0" },
     { name = "safety", marker = "extra == 'dev'", specifier = ">=3.8.1" },
     { name = "semgrep", marker = "extra == 'dev'", specifier = ">=1.172.0" },
-    { name = "setuptools", specifier = ">=81.0.0,<82" },
+    { name = "setuptools", specifier = ">=83.0.0" },
     { name = "six", specifier = ">=1.17.0" },
     { name = "sphinx", specifier = ">=9.0.4" },
     { name = "sphinx-rtd-theme", specifier = ">=3.1.0" },
@@ -2904,11 +2886,11 @@ wheels = [
 
 [[package]]
 name = "setuptools"
-version = "81.0.0"
+version = "84.0.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0d/1c/73e719955c59b8e424d015ab450f51c0af856ae46ea2da83eba51cc88de1/setuptools-81.0.0.tar.gz", hash = "sha256:487b53915f52501f0a79ccfd0c02c165ffe06631443a886740b91af4b7a5845a", size = 1198299, upload-time = "2026-02-06T21:10:39.601Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6d/44/f5da03a8ef95d369145c5bb53050e7877c9f3d312e128605fd9504829143/setuptools-84.0.0.tar.gz", hash = "sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73", size = 1168449, upload-time = "2026-08-08T18:27:58.365Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e1/e3/c164c88b2e5ce7b24d667b9bd83589cf4f3520d97cad01534cd3c4f55fdb/setuptools-81.0.0-py3-none-any.whl", hash = "sha256:fdd925d5c5d9f62e4b74b30d6dd7828ce236fd6ed998a08d81de62ce5a6310d6", size = 1062021, upload-time = "2026-02-06T21:10:37.175Z" },
+    { url = "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl", hash = "sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670", size = 818216, upload-time = "2026-08-08T18:27:56.719Z" },
 ]
 
 [[package]]

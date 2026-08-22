@@ -86,7 +86,7 @@ def session(db):
 def client(app):
     """Create a test client for the app."""
     # Patch Redis-related functions for testing
-    with patch("app.event.jobs.rq.get_scheduler", return_value=MockScheduler()):
+    with patch("app.event.jobs.get_scheduler", return_value=MockScheduler()):
         with patch("app.event.jobs.schedule_mail", return_value=None):
             yield app.test_client()
 
@@ -100,5 +100,5 @@ def mock_redis(monkeypatch):
     from unittest.mock import Mock
 
     mock_scheduler = Mock()
-    monkeypatch.setattr("app.event.jobs.rq.get_scheduler", lambda: mock_scheduler)
+    monkeypatch.setattr("app.event.jobs.get_scheduler", lambda: mock_scheduler)
     return mock_scheduler

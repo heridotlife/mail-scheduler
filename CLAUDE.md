@@ -265,13 +265,13 @@ flask run
 flask create_db
 
 # Start RQ worker (for processing jobs)
-flask rq worker
+python -m app.worker
 
 # Start RQ scheduler (for scheduled jobs)
-flask rq scheduler
+rqscheduler --host localhost --port 6379
 
 # Monitor job queue
-flask rq info --interval 3
+rq info --url redis://localhost:6379/0 --interval 3
 ```
 
 ### Docker Development
@@ -735,13 +735,13 @@ curl http://localhost:8080/debug
 
 ```bash
 # Check job queue status
-flask rq info --interval 3
+rq info --url redis://localhost:6379/0 --interval 3
 
 # View failed jobs
-flask rq info --failed
+rq info --url redis://localhost:6379/0 --failed
 
 # Requeue failed job
-flask rq requeue <job_id>
+rq requeue --url redis://localhost:6379/0 <job_id>
 ```
 
 ### Docker Debugging

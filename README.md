@@ -199,22 +199,23 @@ This provides a way to test the API directly from your browser.
 `RQ` is a [simple job queue](http://python-rq.org/) for Python backed by
 [Redis](https://redis.io/).
 
-Start a worker:
+Start a worker (plain RQ worker running jobs inside a Flask app context;
+replaces the removed Flask-RQ2 CLI):
 
 ```bash
-flask rq worker
+python -m app.worker
 ```
 
 Start a scheduler:
 
 ```bash
-flask rq scheduler
+rqscheduler --host localhost --port 6379
 ```
 
 Monitor the status of the queue:
 
 ```bash
-flask rq info --interval 3
+rq info --url redis://localhost:6379/0 --interval 3
 ```
 
 For help on all available commands:

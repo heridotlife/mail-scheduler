@@ -8,12 +8,15 @@ from typing import Any, Dict, List, Union, cast
 import dateutil.parser
 import pytz
 from bs4 import BeautifulSoup
+from flask import current_app
 from flask_mail import Message
+from redis import Redis
+from rq_scheduler import Scheduler
 from tzlocal import get_localzone
 
 from app.database import db
 from app.database.models import Event, Recipient
-from app.extensions import mail, rq
+from app.extensions import mail
 
 
 # Helper function.
@@ -120,6 +123,21 @@ def dt_utc(dt: Union[str, datetime]) -> datetime:
         return utc_now.replace(tzinfo=None)
 
 
+def get_scheduler() -> Scheduler:
+    """
+    Return an rq-scheduler Scheduler bound to the app's Redis connection.
+
+    Replaces Flask-RQ2's ``rq.get_scheduler()``: watches the ``default``
+    queue (the same queue the worker consumes) at the configured
+    ``RQ_SCHEDULER_INTERVAL``.
+    """
+    return Scheduler(
+        queue_name="default",
+        interval=current_app.config.get("RQ_SCHEDULER_INTERVAL", 60),
+        connection=Redis.from_url(current_app.config["RQ_REDIS_URL"]),
+    )
+
+
 def schedule_mail(event_id: int, recipients: List[str], timestamp: datetime) -> None:
     """
     Schedule send_mail job.
@@ -129,12 +147,11 @@ def schedule_mail(event_id: int, recipients: List[str], timestamp: datetime) -> 
         recipients: List of recipient email addresses
         timestamp: When to send the email
     """
-    scheduler = rq.get_scheduler()
+    scheduler = get_scheduler()
     scheduler.enqueue_at(timestamp, send_mail, event_id, recipients)
 
 
 # Main job function.
-@rq.job
 def send_mail(event_id: int, recipients: List[str]) -> str:
     """
     Sends an email asynchronously using flask rq-scheduler.

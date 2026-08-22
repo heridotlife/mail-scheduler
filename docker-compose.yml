@@ -30,7 +30,7 @@ services:
       start_period: 40s
   worker:
     build: .
-    command: python -m flask rq worker
+    command: python -m app.worker
     env_file:
       - .env
     environment:
