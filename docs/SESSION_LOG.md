@@ -336,3 +336,36 @@ All checks passing on PR #28:
 - All quality checks passing in automated pipeline
 - PR #28 merged successfully
 
+
+---
+
+## Session 2026-08-22 - Dependency Update (14-day stability window)
+
+### Persona Selected
+- Primary: **Developer Agent** (dependency maintenance, per PR #27/#28/#30 pattern)
+
+### Context Loaded
+- Files read: pyproject.toml, uv.lock, requirements*.txt, .github/workflows/*, app/extensions.py, app/event/jobs.py
+- Constraints: 14-day stability window (versions published <= 2026-08-08); Flask-RQ2 18.3 compat; pyproject is source of truth; requirements*.txt mirrors
+
+### Decisions Made
+1. Pin 18 packages whose latest release was published after 2026-08-08 to the newest qualifying version via `[tool.uv] constraint-dependencies` (incl. rq 2.11.0 -> 2.10.0; 2.11 also pulls beta opentelemetry-instrumentation-threading 0.58b0).
+2. Cap setuptools `>=81.0.0,<82`: Flask-RQ2 18.3 imports pkg_resources at runtime, removed in setuptools 82.0.0; 81.0.0 (2026-02-06) is the last release shipping it.
+3. Sphinx floor set to 9.0.4 (not 9.1.0): sphinx 9.1.0 requires Python >=3.12; uv.lock pins 9.0.4 on <3.12 and 9.1.0 on >=3.12 via markers.
+4. redis 7->8 + rq 2.6->2.10 adopted: Flask-RQ2 declares no caps (rq>=0.13, redis>=3.0); rq 2.9.1+ officially supports redis-py 8; app only uses @rq.job + get_scheduler().
+5. requirements-loose.txt untouched (deliberately permissive floors, no contradictions).
+6. mcp==1.23.3 vulnerability chain kept: hard-pinned by semgrep 1.172.0 upstream; fixed pairing (semgrep 1.174.0 + mcp 1.29.0) published 2026-08-20, outside window. Pre-existing on main; dev-only.
+
+### Constraints Applied
+- All locked versions verified published <= 2026-08-08 and not yanked (103 changed packages checked against PyPI)
+- pyproject floors raised to exactly match locked versions; mirrors updated to same floors
+
+### Risks Identified
+- setuptools CVE-2026-59890 (<83): fix removes pkg_resources (Flask-RQ2 blocker) - accepted; pre-existing on main (80.9)
+- 3 mcp advisories via semgrep pin: dev-only, pre-existing on main, revisit after 2026-09-03
+
+### Outcomes Achieved
+- 103 packages updated; gates: uv sync --locked PASS, pytest 112 passed/3 skipped, flake8/black/isort PASS, mypy clean (2.3.0, overrides completed), bandit -ll PASS, safety 0 new advisories
+
+### Next Actions
+- Re-evaluate window pins after 2026-09-03 (rq 2.11, setuptools >=83 requires Flask-RQ2 replacement/patch, semgrep 1.174 + mcp 1.29)
