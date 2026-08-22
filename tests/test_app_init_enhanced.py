@@ -143,14 +143,12 @@ def test_register_extensions_initializes_all():
     mock_db = MagicMock()
     mock_mail = MagicMock()
     mock_migrate = MagicMock()
-    mock_rq = MagicMock()
 
     # Patch the extensions
     with (
         patch("app.db", mock_db),
         patch("app.mail", mock_mail),
         patch("app.migrate", mock_migrate),
-        patch("app.rq", mock_rq),
     ):
         # Call the function
         register_extensions(mock_app)
@@ -159,7 +157,6 @@ def test_register_extensions_initializes_all():
     mock_db.init_app.assert_called_once_with(mock_app)
     mock_mail.init_app.assert_called_once_with(mock_app)
     mock_migrate.init_app.assert_called_once_with(mock_app, mock_db)
-    mock_rq.init_app.assert_called_once_with(mock_app)
 
 
 def test_register_commands_adds_all_commands():

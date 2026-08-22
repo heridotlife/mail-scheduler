@@ -8,7 +8,7 @@ from app import config
 from app.api import blueprint as api
 from app.commands import create_db, drop_db, recreate_db
 from app.database import db
-from app.extensions import login, mail, migrate, rq
+from app.extensions import login, mail, migrate
 from app.logging_config import configure_logging, get_app_logger
 
 
@@ -70,7 +70,6 @@ def register_extensions(app):
     db.init_app(app)
     mail.init_app(app)
     migrate.init_app(app, db)
-    rq.init_app(app)
     login.init_app(app)
 
     return None

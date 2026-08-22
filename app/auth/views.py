@@ -54,13 +54,25 @@ class LoginView(MethodView):
             # unexpected characters
             next_page = parsed_url.path
 
-            # Validate that the next_page is a relative path and in the
-            # whitelist
+            # Reject anything that is not an exact relative-path match:
+            # absolute URLs, URL schemes or partial matches all fall through
+            # to the safe default below.
             if parsed_url.netloc or parsed_url.scheme or next_page not in allowed_paths:
-                # Default to a safe fallback
-                next_page = url_for("items.all_events")
+                next_page = ""
 
-            return redirect(next_page)
+            # Re-bind the redirect target to fixed constants — never the
+            # user-supplied string — so the redirect destination is
+            # provably server-controlled and relative.
+            if next_page == "/items/all_events":
+                safe_target = "/items/all_events"
+            elif next_page == "/profile":
+                safe_target = "/profile"
+            elif next_page == "/dashboard":
+                safe_target = "/dashboard"
+            else:
+                safe_target = url_for("items.all_events")
+
+            return redirect(safe_target)
 
         return render_template("auth/login.html", form=form, title="Sign In")
 

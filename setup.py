@@ -16,7 +16,6 @@ setup(
         "flask-sqlalchemy>=3.1.1",
         "Flask-Mail>=0.9.1",
         "Flask-Migrate>=4.0.5",
-        "Flask-RQ2>=18.3",
         "Flask-SQLAlchemy>=3.1.1",
         "pytest>=7.4.3",
         "pytest-flask>=1.3.0",

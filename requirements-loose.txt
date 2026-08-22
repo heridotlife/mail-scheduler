@@ -16,7 +16,6 @@ croniter>=2.0.0
 Flask-Admin>=1.6.0
 Flask-Mail>=0.9.1
 Flask-Migrate>=4.0.0
-Flask-RQ2>=18.3
 Flask-Script>=2.0.6
 Flask-SQLAlchemy>=3.0.0
 isodate>=0.6.0

@@ -222,9 +222,7 @@ def test_schedule_mail(monkeypatch):
     """Test scheduling an email."""
     # Setup mock scheduler
     mock_scheduler = MagicMock()
-    mock_rq = MagicMock()
-    mock_rq.get_scheduler.return_value = mock_scheduler
-    monkeypatch.setattr("app.event.jobs.rq", mock_rq)
+    monkeypatch.setattr("app.event.jobs.get_scheduler", lambda: mock_scheduler)
 
     # Test data
     event_id = 1
