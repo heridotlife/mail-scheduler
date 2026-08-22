@@ -22,7 +22,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
         cache: 'pip'
 
     - name: Install dependencies
@@ -55,7 +55,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
         cache: 'pip'
 
     - name: Install dependencies
@@ -79,7 +79,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
         cache: 'pip'
 
     - name: Install dependencies
@@ -112,7 +112,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
     - uses: actions/checkout@v4
@@ -172,7 +172,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
 
     - name: Set up Docker Compose
       uses: docker/setup-compose-action@v1

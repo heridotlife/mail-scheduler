@@ -369,3 +369,36 @@ All checks passing on PR #28:
 
 ### Next Actions
 - Re-evaluate window pins after 2026-09-03 (rq 2.11, setuptools >=83 requires Flask-RQ2 replacement/patch, semgrep 1.174 + mcp 1.29)
+
+---
+
+## Session 2026-08-22 (b) - Python Runtime Bump to 3.14
+
+### Persona Selected
+- Primary: **Developer Agent** (CI/runtime maintenance, appended to PR #31 branch)
+
+### Context Loaded
+- Files read: .github/workflows/* (6 files), Dockerfile, Dockerfile.scheduler, pyproject.toml, setup.py, tests/conftest.py, docs/Makefile
+- Constraints: additive commit to chore/update-dependencies-2026-08-22; PR #31 commits untouched; requires-python floor stays >=3.11
+
+### Decisions Made
+1. Target 3.14.6 (latest stable; 3.15 is beta, 3.16 does not exist).
+2. quality-checks.yml: all python refs 3.13 -> 3.14 (primary CI pipeline).
+3. ci.yml + pr-checks.yml compatibility matrices -> ['3.13', '3.14']; floor legs kept (ci.yml '3.11' pip leg; pr-checks docs leg '3.13').
+4. scheduled-tests.yml matrix [3.9, 3.11] -> [3.11, 3.14]: 3.9 leg was already broken on main (requires-python >=3.11); keeps 3.11 floor leg, adds 3.14.
+5. security-sast.yml + scheduled-tests.yml uv pin 0.8.3 -> 0.9.18: uv 0.8.3 predates Python 3.14.0 final and cannot install it; 0.9.18 is the pin already proven green on PR #31.
+6. docs.yml 3.11 -> 3.14 (sphinx 9.1.0 selected on py>=3.12; local sphinx-build verified).
+7. Dockerfile python:3.13-slim -> python:3.14-slim; Dockerfile.scheduler python:3.11-slim -> python:3.14-slim (tags verified on Docker Hub).
+8. Added Python 3.14 classifier to pyproject.toml + setup.py.
+
+### Constraints Applied
+- All locked versions verified to ship cp314 linux wheels (psycopg2-binary 2.9.12, greenlet 3.5.4, rpds-py, cryptography 50, pydantic-core, mypy 2.3.0, semgrep 1.172.0, cffi, bcrypt, librt, wrapt, MarkupSafe)
+
+### Risks Identified
+- Flask-RQ2 pkg_resources DeprecationWarnings on 3.14: benign, imports/tests clean - future setuptools>=82 remains the real blocker (see previous session)
+
+### Outcomes Achieved
+- Gates under Python 3.14.6: uv sync --locked (all wheels, no source builds) PASS; pytest 112 passed/3 skipped; flake8/black/isort PASS; mypy clean; bandit -ll exit 0; sphinx 9.1.0 docs build succeeds (12 warnings, CI has no -W)
+
+### Next Actions
+- Monitor CI matrix legs (3.14) on PR #31; drop 3.13 from matrices when 3.15 ships if desired
